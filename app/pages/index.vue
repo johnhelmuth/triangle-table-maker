@@ -1,75 +1,121 @@
 <script setup lang="ts">
 
 import type {ItemInterface} from "~/components/TriangleTable.vue";
-import {probabilityDisplayType, type ProbabilityDisplayTypesType} from "~/utils/TriangleTableTypes";
+import {getCellProbabilityFromIndex} from "~/utils/triangle-table-utils";
 
-const items = [
-  { name: "Negator" },
-  { name: "Telepathy" },
-  { name: "Telekinesis" },
-  { name: "Regeneration" },
-  { name: "Doppelganger" },
-  { name: "Shapeshifting" },
-  { name: "Brick" },
-  { name: "Speedster" },
-  { name: "X-Ray Vision" },
-  { name: "Flamer" },
-  { name: "Chameleon" },
-  { name: "Ghost" },
-  { name: "Metalhead" },
-  { name: "Insect" },
-  { name: "Oracle" },
-] as Array<ItemInterface>;
+const items = reactive([
+  { name: "Negator" } as ItemInterface,
+  { name: "Telepathy" } as ItemInterface,
+  { name: "Telekinesis" } as ItemInterface,
+  { name: "Regeneration" } as ItemInterface,
+  { name: "Doppelganger" } as ItemInterface,
+  { name: "Shapeshifting" } as ItemInterface,
+  { name: "Brick" } as ItemInterface,
+  { name: "Speedster" } as ItemInterface,
+  { name: "X-Ray Vision" } as ItemInterface,
+  { name: "Flamer" } as ItemInterface,
+  { name: "Chameleon" } as ItemInterface,
+  { name: "Ghost" } as ItemInterface,
+  { name: "Metalhead" } as ItemInterface,
+  { name: "Insect" } as ItemInterface,
+  { name: "Oracle" } as ItemInterface,
+]);
 
-const probabilityDisplay = ref('Color') as Ref<ProbabilityDisplayTypesType>;
+const editModeFlag = ref(false);
 
-function colorCheckChanged() {
-  console.log('colorCheckChanged() clicked.');
-  if (probabilityDisplay.value === 'Color') {
-    probabilityDisplay.value = probabilityDisplayType.None;
-  } else {
-    probabilityDisplay.value = probabilityDisplayType.Color;
+const iconNames = ['material-symbols:edit-square-outline-rounded', 'material-symbols:edit-square-rounded']
+const iconName = ref(iconNames[0]||'')
+
+function itemChanged(index: number, newName: string) {
+  console.log('itemChanged index, newName: ', index, newName);
+  if (0 <= index && index < items.length && items[index] && Object.hasOwn(items[index], 'name')) {
+    items[index].name = newName;
   }
 }
+
+function toggleEditMode() {
+  editModeFlag.value = !editModeFlag.value;
+  toggleIconName(iconName, iconNames);
+}
+function toggleIconName(iconName: Ref<string|undefined>, iconNames: string[]) {
+  const newIndex = editModeFlag.value ? 1 : 0;
+  iconName.value = iconNames[newIndex] || '';
+}
+
+const itemsWithProbabilities = computed(() => {
+  const itemList = items.map((item, index) => {
+    const probability = getCellProbabilityFromIndex(index) || 0;
+    return {...item, probability, probAsPercentage: (100*probability/81).toPrecision(3)};
+  })
+  itemList.sort((a, b) => b.probability - a.probability);
+  return itemList;
+})
 
 </script>
 
 <template>
   <div class="triangle-page">
-    <TriangleTable :items="items" :show-probabilities-as="probabilityDisplay"/>
-    <div class="triangle-options">
-      <label for="odds-colors">Show colors</label>
-      <input type="checkbox" name="probability-colors" :checked="probabilityDisplay === probabilityDisplayType.Color" @change="colorCheckChanged">
+    <div class="triangle-table">
+      <TriangleTable :items="items" :edit-mode="editModeFlag" @item-changed="itemChanged"/>
+      <Icon class="edit-mode" :name="iconName ||''" @click="toggleEditMode"/>
+    </div>
+    <div>
+      <h2>Table of probabilities</h2>
+      <div class="items-list">
+        <div class="col-header">Name</div><div class="col-header">Probability</div><div class="col-header">Probability<br>(%)</div>
+        <template v-for="(item, index) of itemsWithProbabilities" :key="`item-${index}`">
+          <div>{{ item.name }}</div>
+          <div>{{ item.probability }} in 81</div>
+          <div>{{ item.probAsPercentage }}%</div>
+        </template>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 
+h2 { text-align: center; }
+
 div.triangle-page {
   margin: 1rem;
   width: 100%;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
+  position: relative;
+  gap: 1rem;
+}
+
+div.triangle-table {
+  display: flex;
+  flex-direction: row;
   position: relative;
 }
 
-div.triangle-options {
-  position: absolute;
-  position-anchor: --triangle-table;
-  right: 3.5rem;
-  right: calc(anchor(right) + 1rem);
-  top: 3rem;
-  top: calc(anchor(top) + 0.5rem);
+div.items-list {
+  width: 40vw;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
 }
-div.triangle-options label {
-  display: none;
-  font-size: 0.75rem;
-  font-family: sans-serif;
+
+@media (max-width: 800px) {
+  div.items-list {
+    width: 50vw;
+  }
 }
-div.triangle-options:hover label {
-  display: inline;
+
+div.col-header {
+  font-weight: bold;
+}
+
+
+div.items-list div {
+  text-align: center;
+}
+div.items-list div:nth-child(3n-2) {
+  text-align: right;
 }
 
 </style>
