@@ -3,10 +3,10 @@
 import {getCellProbabilityFromIndex} from "~/utils/triangle-table-utils";
 import useTableItems from "~/composables/use-table-items";
 
-const {items, getTableItems, saveTableItems, resetTableItems} = useTableItems();
+const {itemList, getItemList, saveItemList, resetItemList} = useTableItems();
 
 onMounted(() => {
-  getTableItems();
+  getItemList();
 })
 
 const editModeFlag = ref(false);
@@ -15,10 +15,15 @@ const iconNames = ['material-symbols:edit-square-outline-rounded', 'material-sym
 const iconName = ref(iconNames[0]||'')
 
 function itemChanged(index: number, newName: string) {
-  if (0 <= index && index < items.length && items[index] && Object.hasOwn(items[index], 'name')) {
-    items[index].name = newName;
-    saveTableItems();
+  if (0 <= index && index < itemList.items.length && itemList.items[index] && Object.hasOwn(itemList.items[index], 'name')) {
+    itemList.items[index].name = newName;
+    saveItemList();
   }
+}
+
+function titleChanged(newTitle: string) {
+  itemList.title = newTitle;
+  saveItemList();
 }
 
 function toggleEditMode() {
@@ -30,34 +35,34 @@ function toggleIconName(iconName: Ref<string|undefined>, iconNames: string[]) {
   iconName.value = iconNames[newIndex] || '';
 }
 function clearItems() {
-  items.splice(0, items.length);
-  saveTableItems();
+  itemList.items.splice(0, itemList.items.length);
+  saveItemList();
 }
 
 function resetToDefault() {
-  resetTableItems();
-  saveTableItems();
+  resetItemList();
+  saveItemList();
 }
 
 const itemsWithProbabilities = computed(() => {
-  const itemList = items.map((item, index) => {
+  const localItems = itemList.items.map((item, index) => {
     const probability = getCellProbabilityFromIndex(index) || 0;
-    const probAsPercentage = (100*probability/81).toPrecision(3)
+    const probAsPercentage = (100*probability/itemList.probabilityMax).toPrecision(3)
     return {
       ...item,
       probability,
       probAsPercentage
     };
   });
-  itemList.sort((a, b) => b.probability - a.probability);
+  localItems.sort((a, b) => b.probability - a.probability);
   let lowerThreshold = 0;
   let upperThreshold = 0;
   let lower = 1;
   let upper = 0;
-  itemList.forEach((item, index) => {
-    const percentage = (100.0*item.probability/81);
+  localItems.forEach((item, index) => {
+    const percentage = (100.0*item.probability/itemList.probabilityMax);
     upperThreshold = lowerThreshold + percentage;
-    if (index === items.length - 1) {
+    if (index === itemList.items.length - 1) {
       upperThreshold = 100.0;
     }
     upper = Math.floor(upperThreshold+0.5);
@@ -66,7 +71,7 @@ const itemsWithProbabilities = computed(() => {
     lower = upper + 1;
     item.d100Range = d100Range;
   })
-  return itemList;
+  return localItems;
 })
 
 </script>
@@ -74,7 +79,13 @@ const itemsWithProbabilities = computed(() => {
 <template>
   <div class="triangle-page">
     <div class="triangle-table">
-      <TriangleTable :items="items" :edit-mode="editModeFlag" @item-changed="itemChanged"/>
+      <TriangleTable
+          :title="itemList.title"
+          :items="itemList.items"
+          :edit-mode="editModeFlag"
+          @item-changed="itemChanged"
+          @title-changed="titleChanged"
+      />
       <div class="triangle-actions-container">
         <Icon class="edit-mode" :name="iconName ||''" @click="toggleEditMode"/>
         <Icon class="clear-action" name="material-symbols:delete-outline-rounded" @click="clearItems"/>
@@ -87,7 +98,7 @@ const itemsWithProbabilities = computed(() => {
         <div class="col-header">Name</div><div class="col-header">Probability</div><div class="col-header">Probability<br>(%)</div><div class="col-header">d100</div>
         <template v-for="(item, index) of itemsWithProbabilities" :key="`item-${index}`">
           <div>{{ item.name }}</div>
-          <div>{{ item.probability }} in 81</div>
+          <div>{{ item.probability }} in {{ itemList.probabilityMax }}</div>
           <div>{{ item.probAsPercentage }}%</div>
           <div v-if="item.d100Range?.length">
             {{ item.d100Range[0] }}

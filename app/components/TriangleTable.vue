@@ -1,21 +1,17 @@
 <script setup lang="ts">
 
 import {getCellProbability} from "~/utils/triangle-table-utils";
-
-export interface ItemInterface {
-  name: string;
-  index?: number;
-  probability?: number;
-  d100Range?: number[];
-}
+import type { ItemInterface } from "~/models/RandomItemList";
 
 const props = defineProps<{
+  title: string,
   items: Array<ItemInterface>,
   editMode?: boolean,
 }>();
 
 const emit = defineEmits<{
-  itemChanged: [index: number, name: string]
+  itemChanged: [index: number, name: string],
+  titleChanged: [title: string],
 }>();
 
 /**
@@ -75,10 +71,17 @@ function logCellChange(evt: InputEvent) {
   }
 }
 
+function logTitleChange(evt: InputEvent) {
+  emit('titleChanged', evt.target?.innerText || '');
+}
+
 </script>
 
 <template>
   <div class="triangle-table-wrapper">
+    <h2 :contenteditable="editMode ? 'plaintext-only' : false" @blur="logTitleChange">
+      {{ title }}
+    </h2>
     <div class="triangle-table-container"  :class="editMode ? 'editing' : null">
       <div class="col-msg"># of pluses (+)</div>
 
@@ -120,6 +123,9 @@ function logCellChange(evt: InputEvent) {
   flex-direction: column;
 }
 
+h2 {
+  text-align: center;
+}
 .triangle-table-container {
   color: black;
   display: grid;

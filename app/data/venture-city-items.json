@@ -1,17 +1,21 @@
-[
-  { "name": "Negator" },
-  { "name": "Telepathy" },
-  { "name": "Telekinesis" },
-  { "name": "Regeneration" },
-  { "name": "Doppelganger" },
-  { "name": "Shapeshifting" },
-  { "name": "Brick" },
-  { "name": "Speedster" },
-  { "name": "X-Ray Vision" },
-  { "name": "Flamer" },
-  { "name": "Chameleon" },
-  { "name": "Ghost" },
-  { "name": "Metalhead" },
-  { "name": "Insect" },
-  { "name": "Oracle" }
-]
+{
+  "title": "Venture City Powers",
+  "items": [
+    { "name": "Negator" },
+    { "name": "Telepathy" },
+    { "name": "Telekinesis" },
+    { "name": "Regeneration" },
+    { "name": "Doppelganger" },
+    { "name": "Shapeshifting" },
+    { "name": "Brick" },
+    { "name": "Speedster" },
+    { "name": "X-Ray Vision" },
+    { "name": "Flamer" },
+    { "name": "Chameleon" },
+    { "name": "Ghost" },
+    { "name": "Metalhead" },
+    { "name": "Insect" },
+    { "name": "Oracle" }
+  ],
+  "probabilityMax": 81
+}
