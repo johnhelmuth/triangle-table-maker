@@ -1,25 +1,13 @@
 <script setup lang="ts">
 
-import type {ItemInterface} from "~/components/TriangleTable.vue";
 import {getCellProbabilityFromIndex} from "~/utils/triangle-table-utils";
+import useTableItems from "~/composables/use-table-items";
 
-const items = reactive([
-  { name: "Negator" } as ItemInterface,
-  { name: "Telepathy" } as ItemInterface,
-  { name: "Telekinesis" } as ItemInterface,
-  { name: "Regeneration" } as ItemInterface,
-  { name: "Doppelganger" } as ItemInterface,
-  { name: "Shapeshifting" } as ItemInterface,
-  { name: "Brick" } as ItemInterface,
-  { name: "Speedster" } as ItemInterface,
-  { name: "X-Ray Vision" } as ItemInterface,
-  { name: "Flamer" } as ItemInterface,
-  { name: "Chameleon" } as ItemInterface,
-  { name: "Ghost" } as ItemInterface,
-  { name: "Metalhead" } as ItemInterface,
-  { name: "Insect" } as ItemInterface,
-  { name: "Oracle" } as ItemInterface,
-]);
+const {items, getTableItems, saveTableItems, resetTableItems} = useTableItems();
+
+onMounted(() => {
+  getTableItems();
+})
 
 const editModeFlag = ref(false);
 
@@ -27,9 +15,9 @@ const iconNames = ['material-symbols:edit-square-outline-rounded', 'material-sym
 const iconName = ref(iconNames[0]||'')
 
 function itemChanged(index: number, newName: string) {
-  console.log('itemChanged index, newName: ', index, newName);
   if (0 <= index && index < items.length && items[index] && Object.hasOwn(items[index], 'name')) {
     items[index].name = newName;
+    saveTableItems();
   }
 }
 
@@ -41,13 +29,43 @@ function toggleIconName(iconName: Ref<string|undefined>, iconNames: string[]) {
   const newIndex = editModeFlag.value ? 1 : 0;
   iconName.value = iconNames[newIndex] || '';
 }
+function clearItems() {
+  items.splice(0, items.length);
+  saveTableItems();
+}
+
+function resetToDefault() {
+  resetTableItems();
+  saveTableItems();
+}
 
 const itemsWithProbabilities = computed(() => {
   const itemList = items.map((item, index) => {
     const probability = getCellProbabilityFromIndex(index) || 0;
-    return {...item, probability, probAsPercentage: (100*probability/81).toPrecision(3)};
-  })
+    const probAsPercentage = (100*probability/81).toPrecision(3)
+    return {
+      ...item,
+      probability,
+      probAsPercentage
+    };
+  });
   itemList.sort((a, b) => b.probability - a.probability);
+  let lowerThreshold = 0;
+  let upperThreshold = 0;
+  let lower = 1;
+  let upper = 0;
+  itemList.forEach((item, index) => {
+    const percentage = (100.0*item.probability/81);
+    upperThreshold = lowerThreshold + percentage;
+    if (index === items.length - 1) {
+      upperThreshold = 100.0;
+    }
+    upper = Math.floor(upperThreshold+0.5);
+    const d100Range = [lower, upper, upper-lower+1];
+    lowerThreshold = upperThreshold;
+    lower = upper + 1;
+    item.d100Range = d100Range;
+  })
   return itemList;
 })
 
@@ -57,16 +75,25 @@ const itemsWithProbabilities = computed(() => {
   <div class="triangle-page">
     <div class="triangle-table">
       <TriangleTable :items="items" :edit-mode="editModeFlag" @item-changed="itemChanged"/>
-      <Icon class="edit-mode" :name="iconName ||''" @click="toggleEditMode"/>
+      <div class="triangle-actions-container">
+        <Icon class="edit-mode" :name="iconName ||''" @click="toggleEditMode"/>
+        <Icon class="clear-action" name="material-symbols:delete-outline-rounded" @click="clearItems"/>
+        <Icon class="reset-to-default-action" name="material-symbols:clock-loader-60-sharp" @click="resetToDefault"/>
+      </div>
     </div>
     <div>
       <h2>Table of probabilities</h2>
       <div class="items-list">
-        <div class="col-header">Name</div><div class="col-header">Probability</div><div class="col-header">Probability<br>(%)</div>
+        <div class="col-header">Name</div><div class="col-header">Probability</div><div class="col-header">Probability<br>(%)</div><div class="col-header">d100</div>
         <template v-for="(item, index) of itemsWithProbabilities" :key="`item-${index}`">
           <div>{{ item.name }}</div>
           <div>{{ item.probability }} in 81</div>
           <div>{{ item.probAsPercentage }}%</div>
+          <div v-if="item.d100Range?.length">
+            {{ item.d100Range[0] }}
+            <span v-if="item.d100Range[0] != item.d100Range[1]">- {{ item.d100Range[1] }}</span>
+            <!-- {{ item.d100Range[2] }} -->
+          </div>
         </template>
       </div>
     </div>
@@ -78,7 +105,6 @@ const itemsWithProbabilities = computed(() => {
 h2 { text-align: center; }
 
 div.triangle-page {
-  margin: 1rem;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -94,15 +120,31 @@ div.triangle-table {
   position: relative;
 }
 
+div.triangle-table div.triangle-actions-container {
+  height: 10rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+  font-size: 1.25rem;
+}
+
 div.items-list {
-  width: 40vw;
+  width: 40em;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 2fr;
+  row-gap: 0.25rem;
 }
 
 @media (max-width: 800px) {
   div.items-list {
-    width: 50vw;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 500px) {
+  div.items-list {
+    font-size: 0.5rem;
   }
 }
 
@@ -114,7 +156,7 @@ div.col-header {
 div.items-list div {
   text-align: center;
 }
-div.items-list div:nth-child(3n-2) {
+div.items-list div:nth-child(4n-3) {
   text-align: right;
 }
 

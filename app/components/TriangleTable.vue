@@ -6,6 +6,7 @@ export interface ItemInterface {
   name: string;
   index?: number;
   probability?: number;
+  d100Range?: number[];
 }
 
 const props = defineProps<{
@@ -27,11 +28,13 @@ const tableRows = computed(() => {
   let row = [] as Array<ItemInterface>;
   let rowCols = 4;
   let cols = rowCols;
+
   let index = 0;
-  for( const item of props.items) {
-    row.push({...item,
+  for (const item of props.items) {
+    row.push({
+      ...item,
       index,
-      probability: getCellProbability(4-rowCols, rowCols-cols),
+      probability: getCellProbability(4 - rowCols, rowCols - cols),
     });
     index++;
     if (cols < 1) {
@@ -59,7 +62,7 @@ function logCellChange(evt: InputEvent) {
     const rowIndex = parseInt(el.dataset?.row);
     const itemIndex = parseInt(el.dataset?.col);
     const newName = el.innerText
-    if (! isNaN(rowIndex) && ! isNaN(itemIndex)) {
+    if (!isNaN(rowIndex) && !isNaN(itemIndex)) {
       if (tableRows.value?.[rowIndex]?.[itemIndex] !== undefined) {
         const item = tableRows.value?.[rowIndex]?.[itemIndex];
         if (item?.index !== undefined) {
@@ -75,83 +78,199 @@ function logCellChange(evt: InputEvent) {
 </script>
 
 <template>
+  <div class="triangle-table-wrapper">
+    <div class="triangle-table-container"  :class="editMode ? 'editing' : null">
+      <div class="col-msg"># of pluses (+)</div>
 
-  <table :class="editMode ? 'editing' : null">
-    <thead>
-    <tr class="columns-label">
-      <th class="not-there">&nbsp;</th>
-      <th colspan="5"># of pluses (+)</th>
-    </tr>
-    <tr class="column-headers">
-      <th class="rows-label"># of<br>minuses (-)</th>
-      <th>0</th>
-      <th>1</th>
-      <th>2</th>
-      <th>3</th>
-      <th>4</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr v-for="(rowItems, rowIndex) in tableRows" :key="rowIndex">
-      <td class="row-headers">{{ rowIndex }}</td>
-      <td v-for="(item, itemIndex) in rowItems" :key="(rowIndex + ':' + itemIndex)" :data-probability="item.probability">
-        <span
-            :name="(`cell-name-${rowIndex}-${itemIndex}`)"
-            :data-row="rowIndex"
-            :data-col="itemIndex"
-            :contenteditable="editMode ? 'plaintext-only' : false"
-            @blur="logCellChange"
-        >
-          {{ item.name }}
-        </span>
-        <div class="hover-block">
-          {{ item.probability + ' / 81' }}<br>{{ (((item.probability || 0) / 81) * 100).toPrecision(3) + '%' }}
-        </div>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+      <div class="row-msg"># of minuses (-)</div>
+      <div class="col-head col-head0">0</div>
+      <div class="col-head col-head1">1</div>
+      <div class="col-head col-head2">2</div>
+      <div class="col-head col-head3">3</div>
+      <div class="col-head col-head4">4</div>
+      <template v-for="(rowItems, rowIndex) in tableRows" :key="rowIndex">
+        <div class="row-head" :class="[`row-head${rowIndex}`]">{{ rowIndex }}</div>
+        <template v-for="(item, itemIndex) in rowItems" :key="(rowIndex + ':' + itemIndex)">
+          <div class="cell" :class="[`cell-${rowIndex}${itemIndex}`]"
+               :data-probability="item.probability">
+            <span
+                :name="(`cell-name-${rowIndex}-${itemIndex}`)"
+                :data-row="rowIndex"
+                :data-col="itemIndex"
+                :contenteditable="editMode ? 'plaintext-only' : false"
+                @blur="logCellChange"
+            >
+              {{ (item.name || " ") }}
+            </span>
+            <div class="hover-block">
+              {{ item.probability + ' in 81' }}<br>{{ (((item.probability || 0) / 81) * 100).toPrecision(3) + '%' }}
+            </div>
+          </div>
+        </template>
+      </template>
+    </div>
+  </div>
 
 </template>
 
 <style scoped>
 
-table {
-  border-collapse: collapse;
-  anchor-name: --triangle-table;
+.triangle-table-wrapper {
+  display: flex;
+  flex-direction: column;
 }
 
-tr.columns-label th {
+.triangle-table-container {
+  color: black;
+  display: grid;
+  grid-template-columns: 7rem repeat(5, 8.5rem);
+  grid-template-areas:
+      ".            colmsg    colmsg    colmsg  colmsg  colmsg"
+      "rowmsg       col-head0  col-head1  col-head2  col-head3  col-head4"
+      "row-label0   cell-00    cell-01    cell-02    cell-03    cell-04"
+      "row-label1   cell-10    cell-11    cell-12    cell-13    ."
+      "row-label2   cell-20    cell-21    cell-22    .          ."
+      "row-label3   cell-30    cell-31    .          .          ."
+      "row-label4   cell-40    .          .          .          .";
+  grid-template-rows: 3rem 4rem repeat(5, 3.5rem);
+}
+
+.triangle-table-container > div {
+  border-right: 1px black solid;
+  border-bottom: 1px black solid;
+  border-top: none;
+  border-left: none;
+  padding: 0.5rem;
+  vertical-align: middle;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.triangle-table-container > div.col-msg {
+  grid-area: colmsg;
+  text-align: center;
+  font-weight: bold;
   font-style: italic;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
 }
 
-tr.column-headers th.rows-label {
+.triangle-table-container > div.row-msg {
+  grid-area: rowmsg;
+  text-align: center;
+  font-weight: bold;
   font-style: italic;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
 }
 
-td.row-headers {
+.col-head {
   text-align: center;
   font-weight: bold;
 }
 
-th, td {
-  padding: 0.5rem;
-  border: 1px solid black;
+.col-head0 {
+  grid-area: col-head0;
 }
 
-td[data-probability] {
-  height: 3rem;
+.col-head1 {
+  grid-area: col-head1;
+}
+
+.col-head2 {
+  grid-area: col-head2;
+}
+
+.col-head3 {
+  grid-area: col-head3;
+}
+
+.col-head4 {
+  grid-area: col-head4;
+}
+
+.triangle-table-container > div.row-head {
+  text-align: center;
+  font-weight: bold;
+  border-left: 1px black solid;
+}
+
+.row-head0 {
+  grid-area: row-label0;
+}
+
+.row-head1 {
+  grid-area: row-label1;
+}
+
+.row-head2 {
+  grid-area: row-label2;
+}
+
+.row-head3 {
+  grid-area: row-label3;
+}
+
+.row-head4 {
+  grid-area: row-label4;
+}
+.cell {
+  text-align: center;
+}
+.cell-00 {
+  grid-area: cell-00;
+}
+.cell-01 {
+  grid-area: cell-01;
+}
+.cell-02 {
+  grid-area: cell-02;
+}
+.cell-03 {
+  grid-area: cell-03;
+}
+.cell-04 {
+  grid-area: cell-04;
+}
+.cell-10 {
+  grid-area: cell-10;
+}
+.cell-11 {
+  grid-area: cell-11;
+}
+.cell-12 {
+  grid-area: cell-12;
+}
+.cell-13 {
+  grid-area: cell-13;
+}
+.cell-20 {
+  grid-area: cell-20;
+}
+.cell-21 {
+  grid-area: cell-21;
+}
+.cell-22 {
+  grid-area: cell-22;
+}
+.cell-30 {
+  grid-area: cell-30;
+}
+.cell-31 {
+  grid-area: cell-31;
+}
+.cell-40 {
+  grid-area: cell-40;
+}
+
+div[data-probability] {
   position: relative;
   text-align: center;
 }
 
-.not-there {
-  border: none;
-}
-
-td[data-probability] .hover-block {
+div[data-probability] .hover-block {
   display: none;
-  position:absolute;
+  position: absolute;
   top: 1.5rem;
   left: 2rem;
   height: 2.8rem;
@@ -166,27 +285,48 @@ td[data-probability] .hover-block {
   box-shadow: 1px 1px 1px grey;
   z-index: 500;
 }
-table td[data-probability]:hover .hover-block {
+
+div[data-probability]:hover .hover-block {
   display: block;
 }
-table.editing td[data-probability]:hover .hover-block {
+.triangle-table-container.editing div[data-probability]:hover .hover-block {
   display: none;
 }
 
-table td[data-probability="1"] {
-  background-color: hsla(120 50% 95.83% / 1);
+.triangle-table-container {
+  --prob-1-bg-color: hsla(120 50% 95.83% / 1);
+  --prob-4-bg-color: hsla(120 50% 81.67% / 1);
+  --prob-6-bg-color: hsla(120 50% 70% / 1);
+  --prob-12-bg-color: hsla(120 50% 45% / 1);
 }
 
-table td[data-probability="4"] {
-  background-color: hsla(120 50% 81.67% / 1);
+.triangle-table-container.editing {
+  --prob-1-bg-color: hsla(120 50% 95.83% / 0.6);
+  --prob-4-bg-color: hsla(120 50% 81.67% / 0.6);
+  --prob-6-bg-color: hsla(120 50% 70% / 0.6);
+  --prob-12-bg-color: hsla(120 50% 45% / 0.6);
+}
+.triangle-table-container.editing div[data-probability] {
+  box-shadow: inset -2px -2px 5px grey;
+}
+.triangle-table-container.editing div[data-probability]:focus {
+  border-color: red;
 }
 
-table td[data-probability="6"] {
-  background-color: hsla(120 50% 70% / 1);
+.triangle-table-container div[data-probability="1"] {
+  background-color: var(--prob-1-bg-color);
 }
 
-table td[data-probability="12"] {
-  background-color: hsla(120 50% 45% / 1);
+.triangle-table-container div[data-probability="4"] {
+  background-color: var(--prob-4-bg-color);
+}
+
+.triangle-table-container div[data-probability="6"] {
+  background-color: var(--prob-6-bg-color);
+}
+
+.triangle-table-container div[data-probability="12"] {
+  background-color: var(--prob-12-bg-color);
 }
 
 </style>

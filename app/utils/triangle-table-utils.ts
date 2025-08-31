@@ -1,4 +1,5 @@
 
+export const TRIANGLE_TABLE_CELL_COUNT = 15;
 
 /**
  * @var probabilityForTable {number[][]}
