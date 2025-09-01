@@ -1,28 +1,27 @@
 <script setup lang="ts">
 
-import {getCellProbabilityFromIndex} from "~/utils/triangle-table-utils";
 import useTableItems from "~/composables/use-table-items";
+import ProbabilityTable from "~/components/probability-table.vue";
 
-const {itemList, getItemList, saveItemList, resetItemList} = useTableItems();
-
-onMounted(() => {
-  getItemList();
-})
+const {itemList, saveItemList, createNewItemList, itemListDirectory, loadItemListByUuid, deleteItemList} = useTableItems();
 
 const editModeFlag = ref(false);
+const showSelectorFlag = ref(false);
 
 const iconNames = ['material-symbols:edit-square-outline-rounded', 'material-symbols:edit-square-rounded']
 const iconName = ref(iconNames[0]||'')
 
 function itemChanged(index: number, newName: string) {
-  if (0 <= index && index < itemList.items.length && itemList.items[index] && Object.hasOwn(itemList.items[index], 'name')) {
+  if (0 <= index && index < itemList.items.length &&
+      itemList.items[index] && Object.hasOwn(itemList.items[index], 'name')
+  ) {
     itemList.items[index].name = newName;
     saveItemList();
   }
 }
 
-function titleChanged(newTitle: string) {
-  itemList.title = newTitle;
+function titleChanged(evt: FocusEvent) {
+  itemList.title = (evt.target as HTMLElement).innerText;
   saveItemList();
 }
 
@@ -34,80 +33,54 @@ function toggleIconName(iconName: Ref<string|undefined>, iconNames: string[]) {
   const newIndex = editModeFlag.value ? 1 : 0;
   iconName.value = iconNames[newIndex] || '';
 }
-function clearItems() {
-  itemList.items.splice(0, itemList.items.length);
-  saveItemList();
+
+function addNewList() {
+  createNewItemList();
 }
 
-function resetToDefault() {
-  resetItemList();
-  saveItemList();
+function showTableList() {
+  showSelectorFlag.value = ! showSelectorFlag.value;
 }
 
-const itemsWithProbabilities = computed(() => {
-  const localItems = itemList.items.map((item, index) => {
-    const probability = getCellProbabilityFromIndex(index) || 0;
-    const probAsPercentage = (100*probability/itemList.probabilityMax).toPrecision(3)
-    return {
-      ...item,
-      probability,
-      probAsPercentage
-    };
-  });
-  localItems.sort((a, b) => b.probability - a.probability);
-  let lowerThreshold = 0;
-  let upperThreshold = 0;
-  let lower = 1;
-  let upper = 0;
-  localItems.forEach((item, index) => {
-    const percentage = (100.0*item.probability/itemList.probabilityMax);
-    upperThreshold = lowerThreshold + percentage;
-    if (index === itemList.items.length - 1) {
-      upperThreshold = 100.0;
-    }
-    upper = Math.floor(upperThreshold+0.5);
-    const d100Range = [lower, upper, upper-lower+1];
-    lowerThreshold = upperThreshold;
-    lower = upper + 1;
-    item.d100Range = d100Range;
-  })
-  return localItems;
-})
+function closeTableSelector() {
+  showSelectorFlag.value = false;
+}
+
+function selectList(uuid: string): void {
+  loadItemListByUuid(uuid);
+}
+
+function deleteList(uuid: string): void {
+  deleteItemList(uuid)
+}
 
 </script>
 
 <template>
   <div class="triangle-page">
+    <h2 :contenteditable="editModeFlag ? 'plaintext-only' : false" @blur="titleChanged">
+      {{ itemList.title }}
+    </h2>
     <div class="triangle-table">
       <TriangleTable
-          :title="itemList.title"
           :items="itemList.items"
           :edit-mode="editModeFlag"
           @item-changed="itemChanged"
-          @title-changed="titleChanged"
       />
       <div class="triangle-actions-container">
-        <Icon class="edit-mode" :name="iconName ||''" @click="toggleEditMode"/>
-        <Icon class="clear-action" name="material-symbols:delete-outline-rounded" @click="clearItems"/>
-        <Icon class="reset-to-default-action" name="material-symbols:clock-loader-60-sharp" @click="resetToDefault"/>
+        <Icon class="action-icon edit-mode" :name="iconName ||''" @click="toggleEditMode"/>
+        <Icon class="action-icon add-new-list-action" name="mdi:table-add" @click="addNewList"/>
+<!--        <Icon class="reset-to-default-action" name="material-symbols:clock-loader-60-sharp" @click="resetToDefault"/>-->
+        <Icon v-if="itemListDirectory.entries.length" class="action-icon table-selector-dropdown" name="material-symbols:arrow-drop-down-rounded" @click="showTableList"/>
+        <RandomTableSelector
+            class="random-table-selector" :item-list-directory="itemListDirectory" :show="showSelectorFlag"
+            @close-selector="closeTableSelector"
+            @item-list-selected="selectList"
+            @delete-list="deleteList"
+        />
       </div>
     </div>
-    <div>
-      <h2>Table of probabilities</h2>
-      <div class="items-list">
-        <div class="col-header">Name</div><div class="col-header">Probability</div><div class="col-header">Probability<br>(%)</div><div class="col-header">d100</div>
-        <template v-for="(item, index) of itemsWithProbabilities" :key="`item-${index}`">
-          <div>{{ item.name }}</div>
-          <div>{{ item.probability }} in {{ itemList.probabilityMax }}</div>
-          <div>{{ item.probAsPercentage }}%</div>
-          <div v-if="item.d100Range?.length">
-            {{ item.d100Range[0] }}
-            <span v-if="item.d100Range[0] != item.d100Range[1]">- {{ item.d100Range[1] }}</span>
-            <!-- {{ item.d100Range[2] }} -->
-          </div>
-        </template>
-      </div>
-    </div>
+    <ProbabilityTable :itemList="itemList" />
   </div>
 </template>
 
@@ -140,35 +113,22 @@ div.triangle-table div.triangle-actions-container {
   font-size: 1.25rem;
 }
 
-div.items-list {
-  width: 40em;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 2fr;
-  row-gap: 0.25rem;
+div.random-table-selector {
+  border: 1px solid black;
+  position-anchor: --table-selector-button;
+  position: absolute;
+  top: calc(anchor(bottom) - 5px);
+  right: calc(anchor(right));
+  box-shadow: 3px 2px 5px grey;
+  background-color: white;
+  padding: 0.5rem;
 }
 
-@media (max-width: 800px) {
-  div.items-list {
-    font-size: 0.8rem;
-  }
+.table-selector-dropdown {
+  anchor-name: --table-selector-button;
 }
 
-@media (max-width: 500px) {
-  div.items-list {
-    font-size: 0.5rem;
-  }
+.action-icon {
+  font-size: 1.5rem;
 }
-
-div.col-header {
-  font-weight: bold;
-}
-
-
-div.items-list div {
-  text-align: center;
-}
-div.items-list div:nth-child(4n-3) {
-  text-align: right;
-}
-
 </style>
