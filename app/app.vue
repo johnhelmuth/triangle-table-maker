@@ -5,6 +5,25 @@ import {version} from '~/../package.json';
 const appVersion = `v${version}`;
 const copyrightDate = "2025";
 
+/*
+ * Workaround this issue where the tailwindcss vite plugin tries to convert hsl() colors to hex codes, which impacts
+ *   hsl(from hsl(...) ...) color specifications from working correctly.
+ *
+ *   https://github.com/tailwindlabs/tailwindcss/issues/18591
+ *   https://github.com/tailwindlabs/tailwindcss/issues/18103
+ *   https://github.com/tailwindlabs/tailwindcss/discussions/18110
+ *
+ * Trying this workaround to just use the main.css file out of the public/ directory, avoiding the css processing.
+ */
+useHead({
+  link: [
+    {
+      rel: "stylesheet",
+      href: "/css/main.css"
+    }
+  ]
+})
+
 </script>
 
 <template>
