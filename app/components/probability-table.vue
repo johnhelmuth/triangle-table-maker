@@ -67,17 +67,18 @@ div.items-list {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 2fr;
   row-gap: 0.25rem;
+  font-size: 1.2rem;
 }
 
 @media (max-width: 800px) {
   div.items-list {
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
 }
 
 @media (max-width: 500px) {
   div.items-list {
-    font-size: 0.5rem;
+    font-size: 0.8rem;
   }
 }
 
