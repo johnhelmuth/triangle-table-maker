@@ -213,7 +213,6 @@ export default function useTableItems() {
   return {
     itemList,
     itemListDirectory,
-    isActive,
     saveItemList,
     createNewItemList,
     loadItemListByUuid,

@@ -1,8 +1,6 @@
 <script setup lang="ts">
 
-import {dateFormat} from "~/utils/date-time.client";
 import type {ItemListDirListInterface} from "~/models/RandomItemList";
-const { isActive } = useTableItems();
 
 const props = defineProps<{
   itemListDirectory: ItemListDirListInterface,
@@ -24,7 +22,7 @@ function elementHasUuid(el: HTMLElement) {
 
 function itemListSelected(evt: MouseEvent) {
   const uuidOwner = (evt.target as HTMLElement).closest('[data-uuid]') as HTMLElement;
-  if (elementHasUuid(uuidOwner) && ! isActive(uuidOwner.dataset.uuid as string)) {
+  if (elementHasUuid(uuidOwner) && uuidOwner.dataset.uuid !== props.itemListDirectory.currentListUuid) {
     emit('itemListSelected', uuidOwner.dataset.uuid as string);
   }
   emit('closeSelector')
@@ -32,7 +30,7 @@ function itemListSelected(evt: MouseEvent) {
 
 function deleteItemList(evt: MouseEvent) {
   const uuidOwner = (evt.target as HTMLElement).closest('[data-uuid]') as HTMLElement;
-  if (elementHasUuid(uuidOwner) && ! isActive(uuidOwner.dataset.uuid as string)) {
+  if (elementHasUuid(uuidOwner) && uuidOwner.dataset.uuid !== props.itemListDirectory.currentListUuid) {
     emit('deleteList', uuidOwner.dataset.uuid as string);
   }
   emit('closeSelector')
@@ -44,9 +42,9 @@ function deleteItemList(evt: MouseEvent) {
 
   <div
       v-if="itemListDirectory.entries.length" class="table-selector"
-      :class="false || show ? 'show-table' : '' "
+      :class="show ? 'show-table' : '' "
        @mouseleave="mouseLeave">
-    <div class="note">Select random table to load.</div>
+    <div class="note">Select table list to load. Click the trash can to delete a table list.</div>
     <div class="head-container">
       <div class="table-title selector-head">Title</div>
       <div class="table-last-updated selector-head">Last Updated</div>
@@ -54,12 +52,12 @@ function deleteItemList(evt: MouseEvent) {
     </div>
     <div
         v-for="dirEntry of itemListDirectory.entries" :key="dirEntry.uuid" class="entry-container"
-         :class="isActive(dirEntry.uuid) ? '' : 'active'" :data-uuid="dirEntry.uuid">
+         :class="dirEntry.uuid === props.itemListDirectory.currentListUuid ? '' : 'active'" :data-uuid="dirEntry.uuid">
       <div class="table-title" @click="itemListSelected">{{ dirEntry.title }}</div>
       <div class="table-last-updated" @click="itemListSelected">{{ dateFormat(new Date(dirEntry.lastUpdated)) }}</div>
       <div class="table-actions">
         <Icon
-            v-if="itemListDirectory.entries.length && ! isActive(dirEntry.uuid)"
+            v-if="itemListDirectory.entries.length && dirEntry.uuid !== props.itemListDirectory.currentListUuid"
             class="action-icon table-entry-delete"
             name="material-symbols:delete-forever-outline-rounded"
             @click="deleteItemList"

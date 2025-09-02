@@ -3,13 +3,20 @@
 import useTableItems from "~/composables/use-table-items";
 import ProbabilityTable from "~/components/probability-table.vue";
 
-const {itemList, saveItemList, createNewItemList, itemListDirectory, loadItemListByUuid, deleteItemList} = useTableItems();
+const {
+  itemList,
+  saveItemList,
+  createNewItemList,
+  itemListDirectory,
+  loadItemListByUuid,
+  deleteItemList
+} = useTableItems();
 
 const editModeFlag = ref(false);
 const showSelectorFlag = ref(false);
 
 const iconNames = ['material-symbols:edit-square-outline-rounded', 'material-symbols:edit-square-rounded']
-const iconName = ref(iconNames[0]||'')
+const iconName = ref(iconNames[0] || '')
 
 function itemChanged(index: number, newName: string) {
   if (0 <= index && index < itemList.items.length &&
@@ -29,7 +36,8 @@ function toggleEditMode() {
   editModeFlag.value = !editModeFlag.value;
   toggleIconName(iconName, iconNames);
 }
-function toggleIconName(iconName: Ref<string|undefined>, iconNames: string[]) {
+
+function toggleIconName(iconName: Ref<string | undefined>, iconNames: string[]) {
   const newIndex = editModeFlag.value ? 1 : 0;
   iconName.value = iconNames[newIndex] || '';
 }
@@ -39,7 +47,7 @@ function addNewList() {
 }
 
 function showTableList() {
-  showSelectorFlag.value = ! showSelectorFlag.value;
+  showSelectorFlag.value = !showSelectorFlag.value;
 }
 
 function closeTableSelector() {
@@ -57,7 +65,7 @@ function deleteList(uuid: string): void {
 </script>
 
 <template>
-  <div class="triangle-page">
+  <div class="triangle-page" :class="editModeFlag ? 'editing' : ''">
     <h2 :contenteditable="editModeFlag ? 'plaintext-only' : false" @blur="titleChanged">
       {{ itemList.title }}
     </h2>
@@ -70,8 +78,9 @@ function deleteList(uuid: string): void {
       <div class="triangle-actions-container">
         <Icon class="action-icon edit-mode" :name="iconName ||''" @click="toggleEditMode"/>
         <Icon class="action-icon add-new-list-action" name="mdi:table-add" @click="addNewList"/>
-<!--        <Icon class="reset-to-default-action" name="material-symbols:clock-loader-60-sharp" @click="resetToDefault"/>-->
-        <Icon v-if="itemListDirectory.entries.length" class="action-icon table-selector-dropdown" name="material-symbols:arrow-drop-down-rounded" @click="showTableList"/>
+        <!--        <Icon class="reset-to-default-action" name="material-symbols:clock-loader-60-sharp" @click="resetToDefault"/>-->
+        <Icon v-if="itemListDirectory.entries.length" class="action-icon table-selector-dropdown"
+              name="material-symbols:arrow-drop-down-rounded" @click="showTableList"/>
         <RandomTableSelector
             class="random-table-selector" :item-list-directory="itemListDirectory" :show="showSelectorFlag"
             @close-selector="closeTableSelector"
@@ -80,13 +89,24 @@ function deleteList(uuid: string): void {
         />
       </div>
     </div>
-    <ProbabilityTable :itemList="itemList" />
+    <ProbabilityTable :itemList="itemList"/>
   </div>
 </template>
 
 <style scoped>
 
-h2 { text-align: center; }
+h2 {
+  text-align: center;
+  padding: 0.5rem;
+}
+
+h2:not([contenteditable="false"]), h2[contenteditable="plaintextonly"] {
+  box-shadow: inset -2px -2px 5px grey,
+  inset 1px 1px 5px lightgrey;
+}
+h2:not([contenteditable="false"]):focus, h2[contenteditable="plaintextonly"]:focus {
+  background-color: hsl(180deg, 0%, 90%)
+}
 
 div.triangle-page {
   width: 100%;

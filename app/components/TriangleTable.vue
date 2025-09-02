@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import {getCellProbability} from "~/utils/triangle-table-utils";
-import type { ItemInterface } from "~/models/RandomItemList";
+import type {ItemInterface} from "~/models/RandomItemList";
 
 const props = defineProps<{
   items: Array<ItemInterface>,
@@ -73,7 +73,7 @@ function logCellChange(evt: InputEvent) {
 
 <template>
   <div class="triangle-table-wrapper">
-    <div class="triangle-table-container"  :class="editMode ? 'editing' : null">
+    <div class="triangle-table-container" :class="editMode ? 'editing' : null">
       <div class="col-msg"># of pluses (+)</div>
 
       <div class="row-msg"># of minuses (-)</div>
@@ -86,16 +86,14 @@ function logCellChange(evt: InputEvent) {
         <div class="row-head" :class="[`row-head${rowIndex}`]">{{ rowIndex }}</div>
         <template v-for="(item, itemIndex) in rowItems" :key="(rowIndex + ':' + itemIndex)">
           <div class="cell" :class="[`cell-${rowIndex}${itemIndex}`]"
-               :data-probability="item.probability">
-            <span
-                :name="(`cell-name-${rowIndex}-${itemIndex}`)"
-                :data-row="rowIndex"
-                :data-col="itemIndex"
-                :contenteditable="editMode ? 'plaintext-only' : false"
-                @blur="logCellChange"
-            >
-              {{ (item.name || " ") }}
-            </span>
+               :data-probability="item.probability"
+               :name="(`cell-name-${rowIndex}-${itemIndex}`)"
+               :data-row="rowIndex"
+               :data-col="itemIndex"
+               :contenteditable="editMode ? 'plaintext-only' : false"
+               @blur="logCellChange"
+          >
+            {{ (item.name || " ") }}
             <div class="hover-block">
               {{ item.probability + ' in 81' }}<br>{{ (((item.probability || 0) / 81) * 100).toPrecision(3) + '%' }}
             </div>
@@ -117,6 +115,7 @@ function logCellChange(evt: InputEvent) {
 h2 {
   text-align: center;
 }
+
 .triangle-table-container {
   color: black;
   display: grid;
@@ -142,7 +141,9 @@ h2 {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background-color: var(--background-color-middle-1)
 }
+
 .triangle-table-container > div.col-msg {
   grid-area: colmsg;
   text-align: center;
@@ -164,6 +165,7 @@ h2 {
 .col-head {
   text-align: center;
   font-weight: bold;
+  font-size: 1.2rem;
 }
 
 .col-head0 {
@@ -190,6 +192,7 @@ h2 {
   text-align: center;
   font-weight: bold;
   border-left: 1px black solid;
+  font-size: 1.2rem;
 }
 
 .row-head0 {
@@ -211,51 +214,68 @@ h2 {
 .row-head4 {
   grid-area: row-label4;
 }
+
 .cell {
   text-align: center;
+  font-size: 1.2rem;
 }
+
 .cell-00 {
   grid-area: cell-00;
 }
+
 .cell-01 {
   grid-area: cell-01;
 }
+
 .cell-02 {
   grid-area: cell-02;
 }
+
 .cell-03 {
   grid-area: cell-03;
 }
+
 .cell-04 {
   grid-area: cell-04;
 }
+
 .cell-10 {
   grid-area: cell-10;
 }
+
 .cell-11 {
   grid-area: cell-11;
 }
+
 .cell-12 {
   grid-area: cell-12;
 }
+
 .cell-13 {
   grid-area: cell-13;
 }
+
 .cell-20 {
   grid-area: cell-20;
 }
+
 .cell-21 {
   grid-area: cell-21;
 }
+
 .cell-22 {
   grid-area: cell-22;
 }
+
 .cell-30 {
   grid-area: cell-30;
 }
+
 .cell-31 {
   grid-area: cell-31;
 }
+
 .cell-40 {
   grid-area: cell-40;
 }
@@ -286,28 +306,19 @@ div[data-probability] .hover-block {
 div[data-probability]:hover .hover-block {
   display: block;
 }
+
 .triangle-table-container.editing div[data-probability]:hover .hover-block {
   display: none;
 }
 
-.triangle-table-container {
-  --prob-1-bg-color: hsla(120 50% 95.83% / 1);
-  --prob-4-bg-color: hsla(120 50% 81.67% / 1);
-  --prob-6-bg-color: hsla(120 50% 70% / 1);
-  --prob-12-bg-color: hsla(120 50% 45% / 1);
+
+.triangle-table-container.editing div[data-probability] {
+  box-shadow: inset -2px -2px 5px grey,
+  inset 1px 1px 5px lightgrey
 }
 
-.triangle-table-container.editing {
-  --prob-1-bg-color: hsla(120 50% 95.83% / 0.6);
-  --prob-4-bg-color: hsla(120 50% 81.67% / 0.6);
-  --prob-6-bg-color: hsla(120 50% 70% / 0.6);
-  --prob-12-bg-color: hsla(120 50% 45% / 0.6);
-}
-.triangle-table-container.editing div[data-probability] {
-  box-shadow: inset -2px -2px 5px grey;
-}
 .triangle-table-container.editing div[data-probability]:focus {
-  border-color: red;
+  background-color: var(--background-color-middle-1);
 }
 
 .triangle-table-container div[data-probability="1"] {

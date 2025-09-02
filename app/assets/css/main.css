@@ -1,0 +1,18 @@
+:root {
+    --background-color-lowest: hsl(205 50% 99% / 1);
+    --background-color-middle-1: hsl(from var(--background-color-lowest) h s calc(l - 5) / 1 );
+
+    /* Colors used to indicate the relative probability of items in the triangle table.
+     *    "prob-1" is the color for 1 / 81 probability, "prob-4" is for 4 / 81, etc.
+     *     2.5 luminance darker per 1/81st probability.
+     */
+    --prob-1-bg-color: hsl(from var(--background-color-middle-1) h s calc(l - 2.5) / 1);
+    --prob-4-bg-color: hsl(from var(--background-color-middle-1) h s calc(l - 10) / 1);
+    --prob-6-bg-color: hsl(from var(--background-color-middle-1) h s calc(l - 15) / 1);
+    --prob-12-bg-color: hsl(from var(--background-color-middle-1) h s calc(l - 30) / 1);
+}
+
+body {
+    background-color: var(--background-color-lowest);
+    font-family: Helvetica, Arial, Verdana, sans-serif;
+}
