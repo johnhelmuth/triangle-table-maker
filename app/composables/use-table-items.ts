@@ -202,6 +202,9 @@ export default function useTableItems() {
       items: [] as ItemInterface[],
     };
     ensureTriangleTable(newIL);
+    if (itemListDirectory.entries.length === 0) {
+      saveItemList();
+    }
     loadItemList(newIL);
     saveItemList();
   }
