@@ -1,0 +1,24 @@
+{
+  "uuid": "92c2955f-1532-4ec4-b89e-dbbae05703fe",
+  "title": "According to Plan - Personal Complications",
+  "tableType": "triangle",
+  "version": "0.1",
+  "items": [
+    { "name": "An old lover arrives on the scene" },
+    { "name": "A bystander wanders in" },
+    { "name": "An old rival shows up" },
+    { "name": "Someone you thought dead returns" },
+    { "name": "Another crew is after the same score" },
+    { "name": "Someone breaks under the pressure" },
+    { "name": "An argument hist a boiling point" },
+    { "name": "Someone takes a hostage" },
+    { "name": "Someone gets hurt" },
+    { "name": "Someone gets cold feet" },
+    { "name": "Someone is out for blood" },
+    { "name": "A betrayal is revealed" },
+    { "name": "Someone gets too greedy" },
+    { "name": "The authorities are tipped off" },
+    { "name": "Someone draws unwanted attention" }
+  ],
+  "probabilityMax": 81
+}

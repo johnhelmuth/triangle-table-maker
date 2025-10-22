@@ -6,10 +6,14 @@ export interface ItemInterface {
   d100Range?: number[];
 }
 
+export type TableTypeType = 'triangle';
+
 export interface RandomItemListInterface {
   uuid: string;
   title: string;
+  version: string;
   items: ItemInterface[];
+  tableType: TableTypeType;
   probabilityMax: number;
 }
 
@@ -23,8 +27,8 @@ export interface ItemListDirItemInterface {
 }
 
 export interface ItemListDirListInterface {
+  version: string;
   entries: Array<ItemListDirItemInterface>;
-  currentListUuid: string;
   lastUpdated: number;
 }
 
@@ -32,8 +36,10 @@ export interface ItemListDirListInterface {
 export function isItemList(itemList: any) : itemList is RandomItemListInterface {
   if (itemList && typeof itemList === "object" &&
     "title" in itemList && typeof itemList.title === "string" &&
+    "version" in itemList && typeof itemList.version === "string" &&
     "items" in itemList && Array.isArray(itemList.items) &&
-    "uuid" in itemList && typeof itemList.uuid === "string"
+    "uuid" in itemList && typeof itemList.uuid === "string" &&
+    "tableType" in itemList && typeof itemList.tableType === "string" && itemList.tableType === 'triangle'
   ) {
     return true;
   }
@@ -42,9 +48,9 @@ export function isItemList(itemList: any) : itemList is RandomItemListInterface 
 
 export function isItemListDirectory(itemListDirectory: any) : itemListDirectory is ItemListDirListInterface {
   if (itemListDirectory && typeof itemListDirectory === 'object' &&
+    'version' in itemListDirectory && typeof itemListDirectory.version === "string" &&
     'lastUpdated' in itemListDirectory && typeof itemListDirectory.lastUpdated === 'number' &&
-    'entries' in itemListDirectory && Array.isArray(itemListDirectory.entries) &&
-    'currentListUuid' in itemListDirectory && typeof itemListDirectory.currentListUuid === 'string'
+    'entries' in itemListDirectory && Array.isArray(itemListDirectory.entries)
   ) {
     return true;
   }

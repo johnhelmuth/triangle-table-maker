@@ -1,95 +1,52 @@
 <script setup lang="ts">
 
 import useTableItems from "~/composables/use-table-items";
-import ProbabilityTable from "~/components/probability-table.vue";
 
 const {
-  itemList,
-  saveItemList,
-  createNewItemList,
   itemListDirectory,
-  loadItemListByUuid,
-  deleteItemList
+  createNewItemList,
+  resetToDefault
 } = useTableItems();
 
-const editModeFlag = ref(false);
-const showSelectorFlag = ref(false);
-
-const iconNames = ['material-symbols:edit-square-outline-rounded', 'material-symbols:edit-square-rounded']
-const iconName = ref(iconNames[0] || '')
-
-function itemChanged(index: number, newName: string) {
-  if (0 <= index && index < itemList.items.length &&
-      itemList.items[index] && Object.hasOwn(itemList.items[index], 'name')
-  ) {
-    itemList.items[index].name = newName;
-    saveItemList();
+function addNewList() {
+  const newIL = createNewItemList();
+  if (newIL) {
+    navigateTo({
+      name: 'table-listId',
+      params: {
+        listId: newIL.uuid
+      }
+    });
   }
 }
-
-function titleChanged(evt: FocusEvent) {
-  itemList.title = (evt.target as HTMLElement).innerText;
-  saveItemList();
-}
-
-function toggleEditMode() {
-  editModeFlag.value = !editModeFlag.value;
-  toggleIconName(iconName, iconNames);
-}
-
-function toggleIconName(iconName: Ref<string | undefined>, iconNames: string[]) {
-  const newIndex = editModeFlag.value ? 1 : 0;
-  iconName.value = iconNames[newIndex] || '';
-}
-
-function addNewList() {
-  createNewItemList();
-}
-
-function showTableList() {
-  showSelectorFlag.value = !showSelectorFlag.value;
-}
-
-function closeTableSelector() {
-  showSelectorFlag.value = false;
-}
-
-function selectList(uuid: string): void {
-  loadItemListByUuid(uuid);
-}
-
-function deleteList(uuid: string): void {
-  deleteItemList(uuid)
-}
-
 </script>
 
 <template>
-  <div class="triangle-page" :class="editModeFlag ? 'editing' : ''">
-    <h2 :contenteditable="editModeFlag ? 'plaintext-only' : false" @blur="titleChanged">
-      {{ itemList.title }}
-    </h2>
-    <div class="triangle-table">
-      <TriangleTable
-          :items="itemList.items"
-          :edit-mode="editModeFlag"
-          @item-changed="itemChanged"
-      />
-      <div class="triangle-actions-container">
-        <Icon class="action-icon edit-mode" :name="iconName ||''" @click="toggleEditMode"/>
-        <Icon class="action-icon add-new-list-action" name="mdi:table-add" @click="addNewList"/>
-        <!--        <Icon class="reset-to-default-action" name="material-symbols:clock-loader-60-sharp" @click="resetToDefault"/>-->
-        <Icon v-if="itemListDirectory.entries.length" class="action-icon table-selector-dropdown"
-              name="material-symbols:arrow-drop-down-rounded" @click="showTableList"/>
-        <RandomTableSelector
-            class="random-table-selector" :item-list-directory="itemListDirectory" :show="showSelectorFlag"
-            @close-selector="closeTableSelector"
-            @item-list-selected="selectList"
-            @delete-list="deleteList"
-        />
+  <div class="container">
+    <h2>List of triangle tables</h2>
+    <div class="note">Select table list to load. Click the trash can to delete a table list.</div>
+    <RandomTableList :item-list-directory="itemListDirectory" class="table-list"/>
+    <div class="directory-actions">
+      <div>
+        <button class="action-button" type="button" @click="addNewList">
+          <Icon
+              class="action-icon add-new-list-action"
+              name="mdi:table-add"
+              title="Add new table."
+          />
+          <label>Add new table</label>
+        </button>
+      </div>
+      <div>
+        <button class="action-button" type="button" @click="resetToDefault">
+          <Icon
+              class="reset-to-default-action"
+              name="material-symbols:clock-loader-60-sharp"
+          />
+          <label>Reset to default<br>list of tables.</label>
+        </button>
       </div>
     </div>
-    <ProbabilityTable :itemList="itemList"/>
   </div>
 </template>
 
@@ -97,58 +54,66 @@ function deleteList(uuid: string): void {
 
 h2 {
   text-align: center;
-  padding: 0.5rem;
 }
 
-h2:not([contenteditable="false"]), h2[contenteditable="plaintextonly"] {
-  box-shadow: inset -2px -2px 5px grey,
-  inset 1px 1px 5px lightgrey;
-}
-h2:not([contenteditable="false"]):focus, h2[contenteditable="plaintextonly"]:focus {
-  background-color: hsl(180deg, 0%, 90%)
-}
-
-div.triangle-page {
-  width: 100%;
+div.container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
-  position: relative;
-  gap: 1rem;
+  row-gap: 1rem;
 }
 
-div.triangle-table {
+ul.table-list {
+  width: fit-content;
+}
+
+@media (max-width: 900px) {
+  ul.table-list {
+    width: 100%;
+  }
+}
+
+.directory-actions {
+  margin-top: 1rem;
+  width: 40rem;
   display: flex;
   flex-direction: row;
-  position: relative;
-}
-
-div.triangle-table div.triangle-actions-container {
-  height: 10rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 1.5rem;
-  font-size: 1.25rem;
-}
-
-div.random-table-selector {
-  border: 1px solid black;
-  position-anchor: --table-selector-button;
-  position: absolute;
-  top: calc(anchor(bottom) - 5px);
-  right: calc(anchor(right));
-  box-shadow: 3px 2px 5px grey;
-  background-color: white;
-  padding: 0.5rem;
-}
-
-.table-selector-dropdown {
-  anchor-name: --table-selector-button;
-}
-
-.action-icon {
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
   font-size: 1.5rem;
 }
+
+button.action-button:hover {
+  background-color: lightgrey;
+}
+button.action-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+button.action-button, button.action-button > * {
+  cursor: pointer;
+}
+
+button.action-button > * {
+  width: 2rem;
+  height: 2rem;
+  text-align: center;
+}
+
+button.action-button > label {
+  width: max-content;
+  text-align: center;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
 </style>

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://triangle-table-maker.vercel.app/data/schemas/random-item-list.schema.json",
+  "title": "Random Item List",
+  "description": "A random item list is a list of items from which a random item may be picked. Randomly.",
+  "type": "object",
+  "properties": {
+    "uuid": {
+      "type": "string",
+      "format": "uuid",
+      "description": "A uuid v4 identifier for the random item list."
+    },
+    "title": {
+      "type": "string",
+      "description": "The title of the random item list"
+    },
+    "version": {
+      "type": "string",
+      "description": "The version of the data item."
+    },
+    "probabilityMax": {
+      "type": "number",
+      "description": "The max number of "
+    },
+    "items": {
+      "type": "array",
+      "description": "The list of random items.",
+      "items": {
+
+      }
+    }
+  },
+  "required": ["name"]
+}

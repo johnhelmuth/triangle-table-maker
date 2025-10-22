@@ -42,19 +42,23 @@ const itemsWithProbabilities = computed(() => {
 
   <div>
     <h2>Table of probabilities</h2>
-    <div class="items-list">
-      <div class="col-header">Name</div><div class="col-header">Probability</div><div class="col-header">Probability<br>(%)</div><div class="col-header">d100</div>
+    <ul class="items-list">
+      <li>
+        <div class="col-header">Name</div><div class="col-header">Probability</div><div class="col-header">Probability<br>(%)</div><div class="col-header">d100</div>
+      </li>
       <template v-for="(item, index) of itemsWithProbabilities" :key="`item-${index}`">
-        <div>{{ item.name }}</div>
-        <div>{{ item.probability }} in {{ itemList.probabilityMax }}</div>
-        <div>{{ item.probAsPercentage }}%</div>
-        <div v-if="item.d100Range?.length">
-          {{ item.d100Range[0] }}
-          <span v-if="item.d100Range[0] != item.d100Range[1]">- {{ item.d100Range[1] }}</span>
-          <!-- {{ item.d100Range[2] }} -->
-        </div>
+        <li>
+          <div>{{ item.name }}</div>
+          <div>{{ item.probability }} in {{ itemList.probabilityMax }}</div>
+          <div>{{ item.probAsPercentage }}%</div>
+          <div v-if="item.d100Range?.length">
+            {{ item.d100Range[0] }}
+            <span v-if="item.d100Range[0] != item.d100Range[1]">- {{ item.d100Range[1] }}</span>
+            <!-- {{ item.d100Range[2] }} -->
+          </div>
+        </li>
       </template>
-    </div>
+    </ul>
   </div>
 </template>
 
@@ -62,12 +66,13 @@ const itemsWithProbabilities = computed(() => {
 
 h2 { text-align: center; }
 
-div.items-list {
-  width: 40em;
+ul.items-list {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 2fr;
+  grid-template-columns: max-content minmax(5rem,1fr) minmax(5rem,1fr) minmax(5rem,1fr);
   row-gap: 0.25rem;
+  column-gap: 1rem;
   font-size: 1.2rem;
+  list-style: none;
 }
 
 @media (max-width: 800px) {
@@ -77,19 +82,27 @@ div.items-list {
 }
 
 @media (max-width: 500px) {
-  div.items-list {
+  ul.items-list {
     font-size: 0.8rem;
   }
 }
 
-div.col-header {
-  font-weight: bold;
+ul.items-list > li {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
 }
 
-div.items-list div {
+div.col-header {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+ul.items-list li {
   text-align: center;
 }
-div.items-list div:nth-child(4n-3) {
-  text-align: right;
+
+ul.items-list li div:first-child {
+  text-align: left;
 }
 </style>

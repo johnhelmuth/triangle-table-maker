@@ -1,0 +1,24 @@
+{
+  "uuid": "48e667a1-3dfb-4f2f-8523-cfe9fdb90c7e",
+  "title": "According to Plan - Environmental Complications",
+  "tableType": "triangle",
+  "version": "0.1",
+  "items": [
+    { "name": "Something explodes that shouldn't" },
+    { "name": "Crucial equipment is missing" },
+    { "name": "The score is less than you were expecting" },
+    { "name": "The score has been divided between multiple locations" },
+    { "name": "Someone lost the loot" },
+    { "name": "The score isn't where it's supposed to be" },
+    { "name": "Power goes out at the worst possible moment" },
+    { "name": "Security is tighter than expected" },
+    { "name": "An alarm goes off" },
+    { "name": "You can't touch the floor" },
+    { "name": "The layout has changed" },
+    { "name": "Authorities arrive" },
+    { "name": "They know you're coming" },
+    { "name": "The locks were changed" },
+    { "name": "Someone unexpectedly dies" }
+  ],
+  "probabilityMax": 81
+}

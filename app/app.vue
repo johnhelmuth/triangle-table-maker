@@ -2,6 +2,8 @@
 
 import {version} from '~/../package.json';
 
+const route = useRoute();
+
 const appVersion = `v${version}`;
 const copyrightDate = "2025";
 
@@ -24,17 +26,22 @@ useHead({
   ]
 })
 
+const title = ref('Triangle Table Maker');
+
 </script>
 
 <template>
-  <div>
+  <div class="page-container">
     <NuxtRouteAnnouncer/>
-    <h1>Triangle Table Maker</h1>
+    <h1>
+      <NuxtLink v-if="route.path !== '/'" to="/" title="Triangle table maker home.">{{ title }}</NuxtLink>
+      <span v-else>{{title}}</span>
+    </h1>
     <NuxtPage/>
     <footer>
       <span class="left">{{ appVersion }}</span>
       <span class="right">&copy; John Helmuth {{ copyrightDate }}</span>
-      <a class="github-link" href="https://github.com/johnhelmuth/triangle-table-maker" target="_blank">
+      <a class="github-link" href="https://github.com/johnhelmuth/triangle-table-maker" title="Code repository for Triangle Table Maker at Github.com" target="_blank">
         <Icon name="octicon:mark-github-24" class="github-link-icon"/>
       </a>
     </footer>
@@ -42,6 +49,31 @@ useHead({
 </template>
 
 <style scoped>
+
+.page-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-container > * {
+  width: calc(100vw - 10rem);
+  flex: 1 1 100cqh;
+}
+
+.page-container h1 {
+  flex: 1 0 auto;
+}
+.page-container h1 a {
+  text-decoration: none;
+  color: inherit;
+}
+.page-container footer {
+  flex: 1 0 auto;
+}
+
 h1 {
   text-align: center;
 }

@@ -1,46 +1,53 @@
 import {v4 as uuidv4} from 'uuid';
-import defaultItems from "~/data/venture-city-items.json";
+import ventureCityPowers from "~/data/venture-city-items.json";
+import AtoPPersonalComplications from "~/data/according-to-plan/personal-complications.json";
+import AtoPEnvironmentalComplications from "~/data/according-to-plan/environmental-complications.json";
+
 import {
+  isItemList,
+  isItemListDirectory,
+  isItemListDirItem,
   type ItemInterface,
-  type RandomItemListInterface,
   type ItemListDirItemInterface,
   type ItemListDirListInterface,
-  isItemListDirectory, isItemList, isItemListDirItem
+  type RandomItemListInterface, type TableTypeType
 } from "~/models/RandomItemList";
 import {TRIANGLE_TABLE_CELL_COUNT} from "~/utils/triangle-table-utils";
+import {ITEM_LIST_DIRECTORY_VERSION, migrateItemListDirectoryRaw, RANDOM_ITEM_LIST_VERSION} from "~/utils/migrations";
+
+const defaultItemLists = [
+  ventureCityPowers,
+  AtoPPersonalComplications,
+  AtoPEnvironmentalComplications
+] as RandomItemListInterface[];
+
+const defaultItems = defaultItemLists[0] as RandomItemListInterface;
 
 const LOCALSTORAGE_ITEMS_KEY = 'ttm-random-items';
 const LOCALSTORAGE_ITEMS_DIR_KEY = 'ttm-random-items-directory';
 
-export default function useTableItems() {
+const itemListDirectory = reactive<ItemListDirListInterface>({
+  version: ITEM_LIST_DIRECTORY_VERSION,
+  lastUpdated: 0,
+  entries: [] as Array<ItemListDirItemInterface>
+});
 
-  const itemListDirectory = reactive<ItemListDirListInterface>({
-    lastUpdated: 0,
-    currentListUuid: 'default',
-    entries: [] as Array<ItemListDirItemInterface>
-  });
+export default function useTableItems() {
 
   const {getLocalStorage, hasLocalStorage} = useLocalStorage();
 
-  const itemList = reactive<RandomItemListInterface>(structuredClone(defaultItems));
-  itemList.uuid = uuidv4();
-
   onMounted(() => {
-    initializeStorage();
+    if (import.meta.client) {
+      initializeStorage();
+    }
   })
 
   function initializeStorage() {
-    initializeDirectory();
-    initializeCurrentTableItems();
-  }
-
-  function initializeDirectory() {
     if (hasLocalStorage()) {
       const lsItemDirectoryJSON = getLocalStorage().getItem(LOCALSTORAGE_ITEMS_DIR_KEY);
       if (lsItemDirectoryJSON) {
-        const lsItemDirectory = JSON.parse(lsItemDirectoryJSON);
+        const [isChanged, lsItemDirectory] = migrateItemListDirectoryRaw(JSON.parse(lsItemDirectoryJSON));
         if (isItemListDirectory(lsItemDirectory)) {
-          itemListDirectory.currentListUuid = lsItemDirectory.currentListUuid;
           itemListDirectory.lastUpdated = lsItemDirectory.lastUpdated;
           itemListDirectory.entries.splice(0, itemListDirectory.entries.length);
           lsItemDirectory.entries.forEach((entry) => {
@@ -49,13 +56,25 @@ export default function useTableItems() {
             }
           })
         }
+        if (isChanged) {
+          saveDirectory();
+        }
+      } else {
+        initializeDefaultDirectory();
       }
     }
   }
 
-  function findDirEntry(uuid: string) {
-    return itemListDirectory.entries
-      .find((entry) => entry.uuid === uuid);
+  function initializeDefaultDirectory() {
+    defaultItemLists.forEach(saveItemList)
+  }
+
+  function findDirEntry(uuid?: string) {
+    const dirEntry = itemListDirectory.entries
+      .find((entry) => {
+        return entry.uuid === uuid
+      });
+    return dirEntry;
   }
 
   function findDirEntryIndex(uuid: string) {
@@ -63,21 +82,11 @@ export default function useTableItems() {
       findIndex((entry) => entry.uuid === uuid);
   }
 
-  function initializeCurrentTableItems() {
-    if (hasLocalStorage()) {
-      if (itemListDirectory.currentListUuid === itemList.uuid) {
-        // First time this has been run on a given browser, or has already been loaded.
-        return itemList;
-      }
-      const lsItems = getItemList(itemListDirectory.currentListUuid);
-      if (lsItems && isItemList(lsItems) && lsItems.uuid === itemListDirectory.currentListUuid) {
-        loadItemList(lsItems)
-      }
-    }
-    return itemList;
+  function hasItemList(uuid: string) {
+    return !! (findDirEntry(uuid));
   }
 
-  function getItemList(uuid: string) {
+  function getItemList(uuid?: string) {
     const dirEntry = findDirEntry(uuid);
     if (dirEntry) {
       if (dirEntry?.loaded && isItemList(dirEntry?.itemList)) {
@@ -85,22 +94,22 @@ export default function useTableItems() {
       }
       const lsItemsJSON = getLocalStorage().getItem(dirEntry.key);
       if (lsItemsJSON) {
-        const lsItems = JSON.parse(lsItemsJSON);
+        const [isChanged, lsItems] = migrateRandomItemListRaw(JSON.parse(lsItemsJSON));
         if (lsItems && isItemList(lsItems) && lsItems.uuid === dirEntry.uuid) {
           ensureTriangleTable(lsItems);
           dirEntry.loaded = true;
           dirEntry.itemList = lsItems;
+          if (isChanged) {
+            saveItemList(lsItems);
+          }
           saveDirectory();
-          return lsItems;
+          return dirEntry.itemList;
         }
       }
     }
   }
 
   function deleteItemList(uuid: string) {
-    if (isActive(uuid)) {
-      return;
-    }
     const dirEntryIndex = findDirEntryIndex(uuid);
     if (dirEntryIndex >= 0) {
       const dirEntry = itemListDirectory.entries[dirEntryIndex];
@@ -112,7 +121,7 @@ export default function useTableItems() {
     }
   }
 
-  function saveItemList() {
+  function saveItemList(itemList:RandomItemListInterface) {
     if (hasLocalStorage()) {
       ensureTriangleTable(itemList);
       if (itemList.uuid === 'default') {
@@ -150,11 +159,12 @@ export default function useTableItems() {
         key: getKey(itemList.uuid),
         lastUpdated: Date.now(),
       }
-      itemListDirectory.currentListUuid = newEntry.uuid;
       itemListDirectory.entries.push(newEntry);
     } else {
+      console.log('saveDirEntry() dirEntry before update: ', dirEntry);
       dirEntry.title = itemList.title;
       dirEntry.lastUpdated = Date.now();
+      console.log('saveDirEntry() dirEntry after update: ', dirEntry);
     }
     saveDirectory();
   }
@@ -171,54 +181,35 @@ export default function useTableItems() {
     }
   }
 
-  function loadItemList(newIL: RandomItemListInterface) {
-    if (newIL.uuid === 'default') {
-      itemList.uuid = uuidv4();
-    } else {
-      itemList.uuid = newIL.uuid;
-    }
-    itemList.title = newIL.title;
-    itemList.probabilityMax = newIL.probabilityMax;
-    itemList.items.splice(0, itemList.items.length);
-    newIL.items.forEach((item) => {
-      itemList.items.push(item)
-    });
-    itemListDirectory.currentListUuid = itemList.uuid;
-  }
-
-  function loadItemListByUuid(uuid: string) {
-    const loadedItemList = getItemList(uuid);
-    if (loadedItemList && isItemList(loadedItemList)) {
-      loadItemList(loadedItemList);
-      saveDirectory();
-    }
-  }
-
   function createNewItemList() {
     const newIL = {
       uuid: uuidv4(),
       title: 'New title',
+      version: RANDOM_ITEM_LIST_VERSION,
+      tableType: 'triangle' as TableTypeType,
       probabilityMax: defaultItems.probabilityMax,
       items: [] as ItemInterface[],
     };
     ensureTriangleTable(newIL);
-    if (itemListDirectory.entries.length === 0) {
-      saveItemList();
-    }
-    loadItemList(newIL);
-    saveItemList();
+    saveItemList(newIL);
+    return newIL;
   }
 
-  function isActive(uuid: string): boolean {
-    return uuid === itemListDirectory.currentListUuid;
+  function resetToDefault() {
+    itemListDirectory.entries.forEach(itemList => {
+      getLocalStorage().removeItem(getKey(itemList.uuid));
+    })
+    itemListDirectory.entries = [];
+    initializeDefaultDirectory();
   }
 
   return {
-    itemList,
     itemListDirectory,
+    getItemList,
     saveItemList,
     createNewItemList,
-    loadItemListByUuid,
-    deleteItemList
+    deleteItemList,
+    hasItemList,
+    resetToDefault
   };
 }

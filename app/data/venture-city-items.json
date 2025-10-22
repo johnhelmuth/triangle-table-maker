@@ -1,6 +1,8 @@
 {
-  "uuid": "default",
+  "uuid": "96e03f9c-6900-431e-aae7-a5a685d975c1",
   "title": "Venture City Powers",
+  "tableType": "triangle",
+  "version": "0.1",
   "items": [
     { "name": "Negator" },
     { "name": "Telepathy" },

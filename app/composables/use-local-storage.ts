@@ -4,7 +4,9 @@ let localStorage = undefined as Storage | undefined;
 export default function useLocalStorage() {
 
   onMounted(() => {
-    localStorage = window.localStorage;
+    if (import.meta.client) {
+      localStorage = window.localStorage;
+    }
   })
 
   function hasLocalStorage() {

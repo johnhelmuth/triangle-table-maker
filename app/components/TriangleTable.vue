@@ -47,21 +47,19 @@ const tableRows = computed(() => {
 });
 
 function logCellChange(evt: InputEvent) {
-  console.log(evt);
   const el = evt.target as HTMLElement;
   if (el && el?.dataset && 'innerText' in el &&
       Object.hasOwn(el.dataset, 'row') &&
       Object.hasOwn(el.dataset, 'col')
   ) {
-    const rowIndex = parseInt(el.dataset?.row);
-    const itemIndex = parseInt(el.dataset?.col);
+    const rowIndex = parseInt(el?.dataset?.row);
+    const itemIndex = parseInt(el?.dataset?.col);
     const newName = el.innerText
     if (!isNaN(rowIndex) && !isNaN(itemIndex)) {
       if (tableRows.value?.[rowIndex]?.[itemIndex] !== undefined) {
         const item = tableRows.value?.[rowIndex]?.[itemIndex];
         if (item?.index !== undefined) {
           item.name = newName;
-          console.log('logCellChange() item: ', item);
           emit('itemChanged', item.index, newName);
         }
       }
@@ -128,7 +126,7 @@ h2 {
       "row-label2   cell-20    cell-21    cell-22    .          ."
       "row-label3   cell-30    cell-31    .          .          ."
       "row-label4   cell-40    .          .          .          .";
-  grid-template-rows: 3rem 4rem repeat(5, 3.5rem);
+  grid-template-rows: 3rem 4rem repeat(5, fit-content(3.5rem));
 }
 
 .triangle-table-container > div {
