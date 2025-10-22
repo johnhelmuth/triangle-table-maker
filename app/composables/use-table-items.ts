@@ -1,5 +1,10 @@
 import {v4 as uuidv4} from 'uuid';
-import ventureCityPowers from "~/data/venture-city-items.json";
+import ventureCityPowers from "~/data/fate-codex-3-3-random-character-creation/venture-city-superpowers.json";
+import ventureCityUpbringing from "~/data/fate-codex-3-3-random-character-creation/venture-city-upbringing.json";
+import ventureCityCareerCorp from "~/data/fate-codex-3-3-random-character-creation/venture-city-career-corporate.json";
+import ventureCityCareerNonCorp
+  from "~/data/fate-codex-3-3-random-character-creation/venture-city-career-non-corporate.json";
+import ventureCityTrouble from "~/data/fate-codex-3-3-random-character-creation/venture-city-trouble.json";
 import AtoPPersonalComplications from "~/data/according-to-plan/personal-complications.json";
 import AtoPEnvironmentalComplications from "~/data/according-to-plan/environmental-complications.json";
 
@@ -10,13 +15,18 @@ import {
   type ItemInterface,
   type ItemListDirItemInterface,
   type ItemListDirListInterface,
-  type RandomItemListInterface, type TableTypeType
+  type RandomItemListInterface,
+  type TableTypeType
 } from "~/models/RandomItemList";
 import {TRIANGLE_TABLE_CELL_COUNT} from "~/utils/triangle-table-utils";
 import {ITEM_LIST_DIRECTORY_VERSION, migrateItemListDirectoryRaw, RANDOM_ITEM_LIST_VERSION} from "~/utils/migrations";
 
 const defaultItemLists = [
+  ventureCityUpbringing,
   ventureCityPowers,
+  ventureCityCareerCorp,
+  ventureCityCareerNonCorp,
+  ventureCityTrouble,
   AtoPPersonalComplications,
   AtoPEnvironmentalComplications
 ] as RandomItemListInterface[];
@@ -70,20 +80,18 @@ export default function useTableItems() {
   }
 
   function findDirEntry(uuid?: string) {
-    const dirEntry = itemListDirectory.entries
-      .find((entry) => {
-        return entry.uuid === uuid
-      });
-    return dirEntry;
+    return itemListDirectory.entries
+        .find((entry) => {
+          return entry.uuid === uuid
+        });
   }
 
   function findDirEntryIndex(uuid: string) {
-    return itemListDirectory.entries.
-      findIndex((entry) => entry.uuid === uuid);
+    return itemListDirectory.entries.findIndex((entry) => entry.uuid === uuid);
   }
 
   function hasItemList(uuid: string) {
-    return !! (findDirEntry(uuid));
+    return !!(findDirEntry(uuid));
   }
 
   function getItemList(uuid?: string) {
@@ -121,7 +129,7 @@ export default function useTableItems() {
     }
   }
 
-  function saveItemList(itemList:RandomItemListInterface) {
+  function saveItemList(itemList: RandomItemListInterface) {
     if (hasLocalStorage()) {
       ensureTriangleTable(itemList);
       if (itemList.uuid === 'default') {

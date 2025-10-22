@@ -1,0 +1,24 @@
+{
+  "uuid": "34f2ac6b-4552-4ea7-a9e7-b0167108285f",
+  "title": "Venture City Career - Corporate",
+  "tableType": "triangle",
+  "version": "0.1",
+  "items": [
+    { "name": "Lucky Nobody" },
+    { "name": "Researcher" },
+    { "name": "Corporate Security" },
+    { "name": "Corporate Spy" },
+    { "name": "Excellent Worker" },
+    { "name": "Doctor" },
+    { "name": "A-List Hero" },
+    { "name": "Manager" },
+    { "name": "PR Specialist" },
+    { "name": "Experiment" },
+    { "name": "Bought Powers" },
+    { "name": "B-List Hero" },
+    { "name": "Private Police" },
+    { "name": "Anti-Hero" },
+    { "name": "Politician" }
+  ],
+  "probabilityMax": 81
+}

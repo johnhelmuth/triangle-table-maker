@@ -1,0 +1,24 @@
+{
+  "uuid": "588cd591-31f9-4a7f-8fac-9b3a1c0d3cc4",
+  "title": "Venture City Career - Trouble",
+  "tableType": "triangle",
+  "version": "0.1",
+  "items": [
+    { "name": "N/A" },
+    { "name": "Image Mismatch" },
+    { "name": "Moral Qualms" },
+    { "name": "Corporate Politics" },
+    { "name": "Genetic Killswitch" },
+    { "name": "Wanted Criminal" },
+    { "name": "Hero Complex" },
+    { "name": "Dark Secret" },
+    { "name": "Something to Protect" },
+    { "name": "War on the Corps" },
+    { "name": "Debilitating Injury" },
+    { "name": "Horrible Temper" },
+    { "name": "Widely Hated" },
+    { "name": "Drug Addiction" },
+    { "name": "Supervillain" }
+  ],
+  "probabilityMax": 81
+}

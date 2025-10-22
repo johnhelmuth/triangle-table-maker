@@ -1,0 +1,24 @@
+{
+  "uuid": "40304f1d-97c9-4745-a682-7fc5fa04b145",
+  "title": "Venture City Career - non-Corporate",
+  "tableType": "triangle",
+  "version": "0.1",
+  "items": [
+    { "name": "Mad Scientist" },
+    { "name": "Independent Hero" },
+    { "name": "Journalist" },
+    { "name": "Priest" },
+    { "name": "Lottery Winner" },
+    { "name": "Thief" },
+    { "name": "Totally Average" },
+    { "name": "Activist" },
+    { "name": "Laborer" },
+    { "name": "Thug" },
+    { "name": "Watch Member" },
+    { "name": "Taxi Driver" },
+    { "name": "Vagrant" },
+    { "name": "Handy-man" },
+    { "name": "Crime Lord" }
+  ],
+  "probabilityMax": 81
+}

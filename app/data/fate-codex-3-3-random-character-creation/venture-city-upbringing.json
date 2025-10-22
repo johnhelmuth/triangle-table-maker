@@ -1,0 +1,24 @@
+{
+  "uuid": "a0f37a3a-3330-44de-9892-c60ba2e3e8a6",
+  "title": "Venture City Upbringing",
+  "tableType": "triangle",
+  "version": "0.1",
+  "items": [
+    { "name": "Recent Immigrant" },
+    { "name": "Raised by a Corp" },
+    { "name": "Athletic Child" },
+    { "name": "Self-Made Success" },
+    { "name": "Corporate Heir" },
+    { "name": "Mafia Family" },
+    { "name": "Wageslave Family" },
+    { "name": "Professional Family" },
+    { "name": "Academic Child" },
+    { "name": "Criminal Child" },
+    { "name": "Underclass" },
+    { "name": "Rural Family" },
+    { "name": "Wash-Out" },
+    { "name": "Anarchist Family" },
+    { "name": "Homeless" }
+  ],
+  "probabilityMax": 81
+}
