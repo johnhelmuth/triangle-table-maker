@@ -169,10 +169,8 @@ export default function useTableItems() {
       }
       itemListDirectory.entries.push(newEntry);
     } else {
-      console.log('saveDirEntry() dirEntry before update: ', dirEntry);
       dirEntry.title = itemList.title;
       dirEntry.lastUpdated = Date.now();
-      console.log('saveDirEntry() dirEntry after update: ', dirEntry);
     }
     saveDirectory();
   }

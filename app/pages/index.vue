@@ -19,6 +19,13 @@ function addNewList() {
     });
   }
 }
+
+function resetDirectory() {
+  if (confirm("Are you sure you want to reset this list? All changes will be removed.")) {
+    resetToDefault();
+  }
+}
+
 </script>
 
 <template>
@@ -38,7 +45,7 @@ function addNewList() {
         </button>
       </div>
       <div>
-        <button class="action-button" type="button" @click="resetToDefault">
+        <button class="action-button" type="button" @click="resetDirectory">
           <Icon
               class="reset-to-default-action"
               name="material-symbols:clock-loader-60-sharp"
