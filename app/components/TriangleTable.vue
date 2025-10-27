@@ -52,9 +52,10 @@ function logCellChange(evt: InputEvent) {
       Object.hasOwn(el.dataset, 'row') &&
       Object.hasOwn(el.dataset, 'col')
   ) {
-    const rowIndex = parseInt(el?.dataset?.row);
-    const itemIndex = parseInt(el?.dataset?.col);
-    const newName = el.innerText
+    const dataSet = el.dataset as { row: string; col: string; };
+    const rowIndex = parseInt(dataSet.row);
+    const itemIndex = parseInt(dataSet.col);
+    const newName = el.innerText.trim();
     if (!isNaN(rowIndex) && !isNaN(itemIndex)) {
       if (tableRows.value?.[rowIndex]?.[itemIndex] !== undefined) {
         const item = tableRows.value?.[rowIndex]?.[itemIndex];
@@ -83,15 +84,17 @@ function logCellChange(evt: InputEvent) {
       <template v-for="(rowItems, rowIndex) in tableRows" :key="rowIndex">
         <div class="row-head" :class="[`row-head${rowIndex}`]">{{ rowIndex }}</div>
         <template v-for="(item, itemIndex) in rowItems" :key="(rowIndex + ':' + itemIndex)">
-          <div class="cell" :class="[`cell-${rowIndex}${itemIndex}`]"
-               :data-probability="item.probability"
-               :name="(`cell-name-${rowIndex}-${itemIndex}`)"
-               :data-row="rowIndex"
-               :data-col="itemIndex"
-               :contenteditable="editMode ? 'plaintext-only' : false"
-               @blur="logCellChange"
+          <div
+              class="cell"
+              :class="[`cell-${rowIndex}${itemIndex}`]"
+              :data-probability="item.probability"
+              :data-name="(`cell-name-${rowIndex}-${itemIndex}`)"
+              :data-row="rowIndex"
+              :data-col="itemIndex"
+              :contenteditable="editMode ? 'plaintext-only' : false"
+              @blur="logCellChange"
           >
-            {{ (item.name || " ") }}
+            <div class="item-value">{{ (item.name || " ") }}</div>
             <div class="hover-block">
               {{ item.probability + ' in 81' }}<br>{{ (((item.probability || 0) / 81) * 100).toPrecision(3) + '%' }}
             </div>
