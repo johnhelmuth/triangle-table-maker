@@ -2,7 +2,8 @@
 
 import useTableItems from "~/composables/use-table-items";
 import ProbabilityTable from "~/components/probability-table.vue";
-import {isItemList} from "~/models/RandomItemList"
+import {isItemList} from "~/models/RandomItemList";
+import {sendDataAsURL} from "~/utils/import-export-utils";
 
 const route = useRoute();
 
@@ -17,6 +18,7 @@ const itemList = computed(() => getItemList(route.params?.listId && typeof route
 
 const editModeFlag = ref(false);
 const showSelectorFlag = ref(false);
+const showMenuFlag = ref(false);
 
 const iconNames = ['material-symbols:edit-square-outline-rounded', 'material-symbols:edit-square-rounded']
 const iconName = ref(iconNames[0] || '')
@@ -69,6 +71,19 @@ function closeTableSelector() {
   showSelectorFlag.value = false;
 }
 
+function toggleMenu() {
+  showMenuFlag.value = !showMenuFlag.value;
+}
+
+function closeMenu() {
+  showMenuFlag.value = false;
+}
+
+function exportTableAsJSON() {
+  sendDataAsURL(itemList.value, titleToSlug(itemList.value?.title || 'triangle-table') + '.json');
+  closeMenu();
+}
+
 </script>
 
 <template>
@@ -94,6 +109,15 @@ function closeTableSelector() {
             :show="showSelectorFlag"
             @close-selector="closeTableSelector"
         />
+        <Icon
+            class="action-icon dot-menu"
+            name="mdi:dots-vertical"
+            title="Table menu"
+            @click="toggleMenu"
+        />
+        <ul class="table-menu" :class="{show: showMenuFlag}" @mouseleave="closeMenu">
+          <li @click="exportTableAsJSON">Export as JSON</li>
+        </ul>
       </div>
     </div>
     <ProbabilityTable :itemList="itemList"/>
@@ -150,6 +174,7 @@ div.random-table-selector {
   box-shadow: 3px 2px 5px grey;
   background-color: white;
   padding: 0.5rem;
+  z-index: 750;
 }
 
 .table-selector-dropdown {
@@ -159,4 +184,36 @@ div.random-table-selector {
 .action-icon {
   font-size: 1.5rem;
 }
+
+.table-menu {
+  display: none;
+  margin: 0;
+}
+
+.table-menu.show {
+  display: block;
+  position: fixed;
+  position-anchor: --table-menu-icon;
+  top: anchor(bottom);
+  right: calc(anchor(right));
+  box-shadow: 3px 2px 5px grey;
+  background-color: white;
+  padding: 0.5rem;
+  list-style: none;
+  font-size: 0.8rem;
+  z-index: 750;
+}
+
+.table-menu li {
+  cursor: pointer;
+  height: 1rem;
+}
+.table-menu li:hover {
+  background-color: hsl(0, 0%, 90%);
+}
+
+.action-icon.dot-menu {
+  anchor-name: --table-menu-icon
+}
+
 </style>
