@@ -1,3 +1,4 @@
+import {getCellProbability} from "~/utils/triangle-table-utils";
 
 export interface ItemInterface {
   name: string;
@@ -8,13 +9,20 @@ export interface ItemInterface {
 
 export type TableTypeType = 'triangle';
 
-export interface RandomItemListInterface {
+export interface ItemListInterface {
   uuid: string;
   title: string;
   version: string;
-  items: ItemInterface[];
   tableType: TableTypeType;
   probabilityMax: number;
+}
+
+export interface RandomItemListInterface extends ItemListInterface {
+  items: ItemInterface[];
+}
+
+export interface TriangleListInterface extends ItemListInterface {
+  items: ItemInterface[][];
 }
 
 export interface ItemListDirItemInterface {
@@ -66,4 +74,37 @@ export function isItemListDirItem(itemListDirItem: any) : itemListDirItem is Ite
     return true;
   }
   return false;
+}
+
+export function listToTriangle(itemList: RandomItemListInterface): TriangleListInterface {
+  const rows = [] as Array<Array<ItemInterface>>;
+  let row = [] as Array<ItemInterface>;
+  let rowCols = 4;
+  let cols = rowCols;
+
+  let index = 0;
+  for (const item of itemList.items) {
+    row.push({
+      ...item,
+      index,
+      probability: getCellProbability(4 - rowCols, rowCols - cols),
+    });
+    index++;
+    if (cols < 1) {
+      rows.push(row);
+      row = [] as Array<ItemInterface>;
+      rowCols--;
+      cols = rowCols;
+    } else {
+      cols--;
+    }
+  }
+  if (row.length) {
+    rows.push(row);
+  }
+  const triangleList = {
+    ...itemList,
+    items: rows,
+  } as TriangleListInterface;
+  return triangleList;
 }

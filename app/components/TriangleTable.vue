@@ -1,10 +1,9 @@
 <script setup lang="ts">
 
-import {getCellProbability} from "~/utils/triangle-table-utils";
-import type {ItemInterface} from "~/models/RandomItemList";
+import {listToTriangle, type RandomItemListInterface} from "~/models/RandomItemList";
 
 const props = defineProps<{
-  items: Array<ItemInterface>,
+  itemList: RandomItemListInterface,
   editMode?: boolean,
 }>();
 
@@ -14,36 +13,11 @@ const emit = defineEmits<{
 
 /**
  * @var tableRows ComputedRef<ItemInterface[][]>
- *   Converts the simple list of names from the items property into a list of rows, each with a list of the appropriate
+ *   Converts the simple list of names from the itemList property into a list of rows, each with a list of the appropriate
  *   number of names to build out the Triangle Table.
  */
 const tableRows = computed(() => {
-  const rows = [] as Array<Array<ItemInterface>>;
-  let row = [] as Array<ItemInterface>;
-  let rowCols = 4;
-  let cols = rowCols;
-
-  let index = 0;
-  for (const item of props.items) {
-    row.push({
-      ...item,
-      index,
-      probability: getCellProbability(4 - rowCols, rowCols - cols),
-    });
-    index++;
-    if (cols < 1) {
-      rows.push(row);
-      row = [] as Array<ItemInterface>;
-      rowCols--;
-      cols = rowCols;
-    } else {
-      cols--;
-    }
-  }
-  if (row.length) {
-    rows.push(row);
-  }
-  return rows;
+  return listToTriangle(props.itemList).items;
 });
 
 function logCellChange(evt: InputEvent) {
