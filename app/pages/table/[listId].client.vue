@@ -3,7 +3,7 @@
 import useTableItems from "~/composables/use-table-items";
 import ProbabilityTable from "~/components/probability-table.vue";
 import {isItemList} from "~/models/RandomItemList";
-import {sendDataAsURL} from "~/utils/import-export-utils";
+import {convertTableToCSV, convertTableToMarkdown, sendDataAsURL} from "~/utils/import-export-utils";
 
 const route = useRoute();
 
@@ -80,7 +80,50 @@ function closeMenu() {
 }
 
 function exportTableAsJSON() {
-  sendDataAsURL(itemList.value, titleToSlug(itemList.value?.title || 'triangle-table') + '.json');
+  if (itemList.value) {
+    const text = JSON.stringify(itemList.value);
+    sendDataAsURL(text, titleToSlug(itemList.value?.title || 'triangle-table') + '.json', 'application/json');
+  }
+  closeMenu();
+}
+
+function exportTableAsMarkdown() {
+  if (itemList.value) {
+    const markdownTable = convertTableToMarkdown(itemList.value);
+    sendDataAsURL(markdownTable, titleToSlug(itemList.value?.title || 'triangle-table') + '.md', 'text/markdown');
+  }
+  closeMenu();
+}
+
+function exportTableAsCSV() {
+  if (itemList.value) {
+    const csvTable = convertTableToCSV(itemList.value);
+    sendDataAsURL(csvTable, titleToSlug(itemList.value?.title || 'triangle-table') + '.md', 'text/csv');
+  }
+  closeMenu();
+}
+
+function copyTableAsJSON() {
+  if (itemList.value) {
+    const text = JSON.stringify(itemList.value);
+    navigator.clipboard.writeText(text);
+  }
+  closeMenu();
+}
+
+function copyTableAsMarkdown() {
+  if (itemList.value) {
+    const markdownTable = convertTableToMarkdown(itemList.value);
+    navigator.clipboard.writeText(markdownTable);
+  }
+  closeMenu();
+}
+
+function copyTableAsCSV() {
+  if (itemList.value) {
+    const csvTable = convertTableToCSV(itemList.value);
+    navigator.clipboard.writeText(csvTable);
+  }
   closeMenu();
 }
 
@@ -93,7 +136,7 @@ function exportTableAsJSON() {
     </h2>
     <div class="triangle-table">
       <TriangleTable
-          :items="itemList.items"
+          :item-list="itemList"
           :edit-mode="editModeFlag"
           @item-changed="itemChanged"
       />
@@ -117,6 +160,12 @@ function exportTableAsJSON() {
         />
         <ul class="table-menu" :class="{show: showMenuFlag}" @mouseleave="closeMenu">
           <li @click="exportTableAsJSON">Export as JSON</li>
+          <li @click="exportTableAsMarkdown">Export as Markdown</li>
+          <li @click="exportTableAsCSV">Export as CSV</li>
+          <li><hr></li>
+          <li @click="copyTableAsJSON">Copy as JSON</li>
+          <li @click="copyTableAsMarkdown">Copy as Markdown</li>
+          <li @click="copyTableAsCSV">Copy as CSV</li>
         </ul>
       </div>
     </div>
@@ -198,7 +247,7 @@ div.random-table-selector {
   right: calc(anchor(right));
   box-shadow: 3px 2px 5px grey;
   background-color: white;
-  padding: 0.5rem;
+  padding-left: 0;
   list-style: none;
   font-size: 0.8rem;
   z-index: 750;
@@ -207,6 +256,7 @@ div.random-table-selector {
 .table-menu li {
   cursor: pointer;
   height: 1rem;
+  padding: 0.5rem 0.5rem;
 }
 .table-menu li:hover {
   background-color: hsl(0, 0%, 90%);
