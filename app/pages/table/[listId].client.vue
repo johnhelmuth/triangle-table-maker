@@ -3,7 +3,14 @@
 import useTableItems from "~/composables/use-table-items";
 import ProbabilityTable from "~/components/probability-table.vue";
 import {isItemList} from "~/models/RandomItemList";
-import {convertTableToCSV, convertTableToMarkdown, sendDataAsURL} from "~/utils/import-export-utils";
+import {
+  convertTableToCSV,
+  convertTableToMarkdown,
+  convertTableToPDF,
+  sendDataAsURL,
+  sendDataWithDataURL
+} from "~/utils/import-export-utils";
+import {titleToSlug} from "../../utils/import-export-utils";
 
 const route = useRoute();
 
@@ -103,6 +110,14 @@ function exportTableAsCSV() {
   closeMenu();
 }
 
+function exportTableAsPDF() {
+  if (itemList.value) {
+    const pdfTable = convertTableToPDF(itemList.value);
+    console.log('exportTableAsPDF()', pdfTable);
+    sendDataWithDataURL(pdfTable, titleToSlug(itemList.value?.title || 'triangle-table') + '.pdf');
+  }
+}
+
 function copyTableAsJSON() {
   if (itemList.value) {
     const text = JSON.stringify(itemList.value);
@@ -162,6 +177,7 @@ function copyTableAsCSV() {
           <li @click="exportTableAsJSON">Export as JSON</li>
           <li @click="exportTableAsMarkdown">Export as Markdown</li>
           <li @click="exportTableAsCSV">Export as CSV</li>
+          <li @click="exportTableAsPDF">Export as PDF</li>
           <li><hr></li>
           <li @click="copyTableAsJSON">Copy as JSON</li>
           <li @click="copyTableAsMarkdown">Copy as Markdown</li>
