@@ -98,7 +98,7 @@ function exportTableAsMarkdown() {
 function exportTableAsCSV() {
   if (itemList.value) {
     const csvTable = convertTableToCSV(itemList.value);
-    sendDataAsURL(csvTable, titleToSlug(itemList.value?.title || 'triangle-table') + '.md', 'text/csv');
+    sendDataAsURL(csvTable, titleToSlug(itemList.value?.title || 'triangle-table') + '.csv', 'text/csv');
   }
   closeMenu();
 }
