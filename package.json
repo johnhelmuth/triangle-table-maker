@@ -12,12 +12,12 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxt/eslint": "^1.11.0",
-    "@nuxt/icon": "^2.1.0",
-    "@nuxt/ui": "^4.2.1",
-    "better-sqlite3": "^12.5.0",
-    "eslint": "^9.39.1",
-    "nuxt": "^4.2.1",
+    "@nuxt/eslint": "^1.13.0",
+    "@nuxt/icon": "^2.2.1",
+    "@nuxt/ui": "^4.4.0",
+    "better-sqlite3": "^12.6.2",
+    "eslint": "^9.39.2",
+    "nuxt": "^4.3.0",
     "slugify": "^1.6.6",
     "typescript": "^5.9.3",
     "uuid": "^13.0.0",
